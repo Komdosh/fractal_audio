@@ -709,6 +709,144 @@ const presetFamilies: PresetFamily[] = [
       { name: 'Scene 2: Push', note: 'Low-gain drive on, amp level unchanged, delay added only for rhythmic depth.' },
       { name: 'Scene 3: Solo Lift', note: 'Clean boost or drive level lift, delay feedback increased, reverb kept short.' },
     ],
+    buildSheet: {
+      globals: [
+        { label: 'Tempo', value: '108 BPM', note: 'Quarter-note delay sync.' },
+        { label: 'Input 1 Gate', value: '-70 dB', note: 'Loose; the guitar volume is the primary dynamic control.' },
+        { label: 'Output 1', value: 'Stereo line-level' },
+        { label: 'Pedal 1', value: 'Wah (Expression 1)', note: 'Auto-engage on toe-down.' },
+      ],
+      blocks: [
+        {
+          blockId: 'wahwah',
+          type: 'Classic Wah',
+          params: [
+            { name: 'Frequency', value: 'Modifier → Ext 1' },
+            { name: 'Q', value: '1.6' },
+            { name: 'Range', value: '350 Hz - 1.8 kHz' },
+            { name: 'Auto-engage', value: 'ON, position 5%' },
+          ],
+        },
+        {
+          blockId: 'compressor',
+          type: 'Pedal 1 (Dyna)',
+          params: [
+            { name: 'Ratio', value: '2.5 : 1' },
+            { name: 'Threshold', value: '-15 dB' },
+            { name: 'Attack', value: '10 ms' },
+            { name: 'Release', value: '110 ms' },
+            { name: 'Level', value: '+1.5 dB' },
+          ],
+        },
+        {
+          blockId: 'drive',
+          type: 'Klone Chiron (transparent low-gain)',
+          channels: [
+            { channel: 'A', role: 'Always-on push for Scenes 2-3.' },
+            { channel: 'B', role: 'Higher level for solo lift.' },
+          ],
+          params: [
+            { name: 'Drive', value: '2.5' },
+            { name: 'Tone', value: '5.0' },
+            { name: 'Level', value: '6.5' },
+            { name: 'Mix', value: '100%' },
+          ],
+        },
+        {
+          blockId: 'amp',
+          type: 'Morgan AC20 (Class-A edge)',
+          channels: [{ channel: 'A', role: 'Edge of breakup — guitar volume cleans it up.' }],
+          params: [
+            { name: 'Drive', value: '5.5' },
+            { name: 'Master', value: '7.5' },
+            { name: 'Bass', value: '4.5' },
+            { name: 'Mid', value: '6.0' },
+            { name: 'Treble', value: '5.5' },
+            { name: 'Cut', value: '4.5' },
+          ],
+        },
+        {
+          blockId: 'cab',
+          type: 'DynaCab 1x12 AC20',
+          params: [
+            { name: 'IR 1', value: 'R-121 ribbon' },
+            { name: 'IR 1 Level', value: '0.0 dB' },
+            { name: 'IR 2', value: 'SM57 cap-edge' },
+            { name: 'IR 2 Level', value: '-5.0 dB' },
+            { name: 'Low Cut', value: '85 Hz' },
+            { name: 'High Cut', value: '9.5 kHz' },
+          ],
+        },
+        {
+          blockId: 'delay',
+          type: 'Stereo Analog',
+          params: [
+            { name: 'Time L', value: '1/4' },
+            { name: 'Time R', value: '1/4 dotted' },
+            { name: 'Feedback', value: '24%' },
+            { name: 'Mix', value: '14%' },
+            { name: 'Low Cut', value: '300 Hz' },
+            { name: 'High Cut', value: '4.5 kHz' },
+          ],
+        },
+        {
+          blockId: 'reverb',
+          type: 'Medium Spring',
+          params: [
+            { name: 'Time', value: '2.0 s' },
+            { name: 'Predelay', value: '15 ms' },
+            { name: 'Mix', value: '16%' },
+            { name: 'Low Cut', value: '180 Hz' },
+            { name: 'High Cut', value: '6.5 kHz' },
+          ],
+        },
+      ],
+      scenes: [
+        {
+          name: 'Scene 1: Touch Clean',
+          summary: 'Drive bypassed. Roll guitar volume to 7 for clean; 10 starts to break up.',
+          blockStates: [
+            { blockId: 'wahwah', state: { bypass: 'on' } },
+            { blockId: 'compressor', state: 'on' },
+            { blockId: 'drive', state: 'off' },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'delay', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '10%' }] } },
+            { blockId: 'reverb', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '12%' }] } },
+          ],
+        },
+        {
+          name: 'Scene 2: Push',
+          summary: 'Drive on Ch A. Amp gain unchanged so the boost is the move.',
+          blockStates: [
+            { blockId: 'wahwah', state: { bypass: 'on' } },
+            { blockId: 'compressor', state: 'on' },
+            { blockId: 'drive', state: { channel: 'A' } },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'delay', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '16%' }] } },
+            { blockId: 'reverb', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '14%' }] } },
+          ],
+        },
+        {
+          name: 'Scene 3: Solo Lift',
+          summary: 'Drive Ch B for level boost. Delay opens, reverb stays short for clarity.',
+          blockStates: [
+            { blockId: 'wahwah', state: { bypass: 'on' } },
+            { blockId: 'compressor', state: 'off' },
+            { blockId: 'drive', state: { channel: 'B', overrides: [{ name: 'Level', value: '8.0' }] } },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'delay', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '22%' }, { name: 'Feedback', value: '32%' }] } },
+            { blockId: 'reverb', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '14%' }] } },
+          ],
+        },
+      ],
+      checks: [
+        'The amp Drive setting is the heart of the preset; only change it if changing guitars.',
+        'Bypass-mode on Drive = "Mute FX in" so the amp does not surge on engage.',
+      ],
+    },
   },
   {
     id: 'nashville-slapback',
@@ -726,6 +864,123 @@ const presetFamilies: PresetFamily[] = [
       { name: 'Scene 2: Twang Lead', note: 'Small output lift, slap feedback raised to two repeats, upper mids softened with EQ.' },
       { name: 'Scene 3: Baritone Clean', note: 'Low cut moved up and delay mix reduced to keep lower strings tight.' },
     ],
+    buildSheet: {
+      globals: [
+        { label: 'Tempo', value: '128 BPM' },
+        { label: 'Input 1 Gate', value: '-70 dB' },
+        { label: 'Output 1', value: 'Mono line-level', note: 'Slapback feels best mono — preserves snap.' },
+      ],
+      blocks: [
+        {
+          blockId: 'compressor',
+          type: 'Dyna-Comp (FET squash)',
+          params: [
+            { name: 'Ratio', value: '4.0 : 1' },
+            { name: 'Threshold', value: '-12 dB' },
+            { name: 'Attack', value: '5 ms', note: 'Fast — but not pumping the transient.' },
+            { name: 'Release', value: '60 ms' },
+            { name: 'Level', value: '+3 dB' },
+          ],
+        },
+        {
+          blockId: 'amp',
+          type: 'Tweed Bassman (Normal)',
+          channels: [{ channel: 'A', role: 'Bright clean for chicken-pickin & double-stops.' }],
+          params: [
+            { name: 'Drive', value: '2.5' },
+            { name: 'Master', value: '7.0' },
+            { name: 'Bass', value: '5.0' },
+            { name: 'Mid', value: '7.0' },
+            { name: 'Treble', value: '6.0' },
+            { name: 'Presence', value: '5.5' },
+            { name: 'Bright', value: 'ON' },
+          ],
+        },
+        {
+          blockId: 'cab',
+          type: 'DynaCab 4x10 Bassman RI',
+          params: [
+            { name: 'IR 1', value: 'SM57 cap-edge, on axis' },
+            { name: 'Low Cut', value: '95 Hz' },
+            { name: 'High Cut', value: '9.0 kHz' },
+          ],
+        },
+        {
+          blockId: 'graphic-eq',
+          type: '10-band Graphic',
+          params: [
+            { name: '3.2 kHz', value: '-2 dB', note: 'Trim ice-pick on the bridge pickup.' },
+            { name: '500 Hz', value: '+1 dB' },
+            { name: '125 Hz', value: '-1 dB' },
+            { name: 'Output Level', value: '0.0 dB' },
+          ],
+        },
+        {
+          blockId: 'delay',
+          type: 'Mono Tape',
+          params: [
+            { name: 'Time L', value: '95 ms (absolute)' },
+            { name: 'Feedback', value: '12%', note: 'One repeat.' },
+            { name: 'Mix', value: '15%' },
+            { name: 'Drive', value: '20%' },
+            { name: 'Wow/Flutter', value: '20%' },
+            { name: 'High Cut', value: '4.0 kHz' },
+          ],
+        },
+        {
+          blockId: 'reverb',
+          type: 'Small Spring',
+          params: [
+            { name: 'Time', value: '1.2 s' },
+            { name: 'Predelay', value: '0 ms' },
+            { name: 'Mix', value: '12%' },
+            { name: 'High Cut', value: '6.5 kHz' },
+          ],
+        },
+      ],
+      scenes: [
+        {
+          name: 'Scene 1: Snap',
+          summary: 'Fast comp, single slap repeat. Spring barely present.',
+          blockStates: [
+            { blockId: 'compressor', state: 'on' },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'graphic-eq', state: 'on' },
+            { blockId: 'delay', state: 'on' },
+            { blockId: 'reverb', state: 'on' },
+          ],
+        },
+        {
+          name: 'Scene 2: Twang Lead',
+          summary: 'Two slap repeats, output up 1 dB, top end softened.',
+          blockStates: [
+            { blockId: 'compressor', state: 'on' },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'graphic-eq', state: { bypass: 'on', overrides: [{ name: '3.2 kHz', value: '-3.5 dB' }, { name: 'Output Level', value: '+1.0 dB' }] } },
+            { blockId: 'delay', state: { bypass: 'on', overrides: [{ name: 'Feedback', value: '20%' }, { name: 'Mix', value: '20%' }] } },
+            { blockId: 'reverb', state: 'on' },
+          ],
+        },
+        {
+          name: 'Scene 3: Baritone Clean',
+          summary: 'Low cut raised, delay tucked under to keep lower strings tight.',
+          blockStates: [
+            { blockId: 'compressor', state: 'on' },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: { bypass: 'on', overrides: [{ name: 'Low Cut', value: '120 Hz' }] } },
+            { blockId: 'graphic-eq', state: 'on' },
+            { blockId: 'delay', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '10%' }] } },
+            { blockId: 'reverb', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '10%' }] } },
+          ],
+        },
+      ],
+      checks: [
+        'Bright cap on Tweed Bassman = critical; defeat only if pickups are already harsh.',
+        'Tape Wow/Flutter at 20% adds analog pitch motion; raise for vintage slap, lower for clean.',
+      ],
+    },
   },
   {
     id: 'class-a-jangle',
@@ -743,6 +998,130 @@ const presetFamilies: PresetFamily[] = [
       { name: 'Scene 2: Wide Arp', note: 'Chorus width and delay mix increased for stereo picked patterns.' },
       { name: 'Scene 3: Breakup', note: 'Amp channel gain lifted with a small level trim so the part does not jump.' },
     ],
+    buildSheet: {
+      globals: [
+        { label: 'Tempo', value: '112 BPM', note: 'Drives the dotted-1/8 delay sync.' },
+        { label: 'Input 1 Gate', value: '-72 dB' },
+        { label: 'Output 1', value: 'Stereo line-level' },
+      ],
+      blocks: [
+        {
+          blockId: 'compressor',
+          type: 'Pedal 2 (low-ratio opto)',
+          params: [
+            { name: 'Ratio', value: '2.0 : 1' },
+            { name: 'Threshold', value: '-18 dB' },
+            { name: 'Attack', value: '12 ms' },
+            { name: 'Release', value: '100 ms' },
+            { name: 'Level', value: '+1.5 dB' },
+          ],
+        },
+        {
+          blockId: 'amp',
+          type: 'Class-A 30W Top Boost',
+          channels: [
+            { channel: 'A', role: 'Clean jangle / arp.' },
+            { channel: 'B', role: 'Edge-of-breakup with level matched.' },
+          ],
+          params: [
+            { name: 'Channel A: Drive', value: '3.5' },
+            { name: 'Channel A: Master', value: '7.5' },
+            { name: 'Channel B: Drive', value: '5.5' },
+            { name: 'Channel B: Master', value: '6.0' },
+            { name: 'Bass', value: '4.5' },
+            { name: 'Mid', value: '6.0' },
+            { name: 'Treble', value: '6.5' },
+            { name: 'Cut', value: '4.0', note: 'Lower Cut = brighter top boost on this circuit.' },
+          ],
+        },
+        {
+          blockId: 'cab',
+          type: 'DynaCab 2x12 Class-A 30W',
+          params: [
+            { name: 'IR 1', value: 'R-121 ribbon, on axis' },
+            { name: 'IR 2', value: 'SM57 cap-edge' },
+            { name: 'IR 2 Level', value: '-4.0 dB' },
+            { name: 'Low Cut', value: '90 Hz' },
+            { name: 'High Cut', value: '9.5 kHz' },
+          ],
+        },
+        {
+          blockId: 'chorus',
+          type: 'Stereo Chorus',
+          params: [
+            { name: 'Rate', value: '0.9 Hz' },
+            { name: 'Depth', value: '18%' },
+            { name: 'Mix', value: '15%' },
+            { name: 'Stereo Width', value: '85%' },
+          ],
+        },
+        {
+          blockId: 'delay',
+          type: 'Stereo Digital',
+          params: [
+            { name: 'Time L', value: '1/8' },
+            { name: 'Time R', value: '1/8 dotted' },
+            { name: 'Feedback', value: '20%' },
+            { name: 'Mix', value: '12%' },
+            { name: 'Low Cut', value: '300 Hz' },
+            { name: 'High Cut', value: '5.0 kHz' },
+          ],
+        },
+        {
+          blockId: 'reverb',
+          type: 'Studio Plate',
+          params: [
+            { name: 'Time', value: '2.2 s' },
+            { name: 'Predelay', value: '25 ms' },
+            { name: 'Mix', value: '18%' },
+            { name: 'Low Cut', value: '220 Hz' },
+            { name: 'High Cut', value: '8.0 kHz' },
+          ],
+        },
+      ],
+      scenes: [
+        {
+          name: 'Scene 1: Jangle',
+          summary: 'Amp Ch A. Chorus low, delay hidden, plate present.',
+          blockStates: [
+            { blockId: 'compressor', state: 'on' },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'chorus', state: 'on' },
+            { blockId: 'delay', state: 'on' },
+            { blockId: 'reverb', state: 'on' },
+          ],
+        },
+        {
+          name: 'Scene 2: Wide Arp',
+          summary: 'Chorus opens up, delay mix and stereo spread increase.',
+          blockStates: [
+            { blockId: 'compressor', state: 'on' },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'chorus', state: { bypass: 'on', overrides: [{ name: 'Depth', value: '28%' }, { name: 'Mix', value: '22%' }] } },
+            { blockId: 'delay', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '18%' }, { name: 'Feedback', value: '28%' }] } },
+            { blockId: 'reverb', state: 'on' },
+          ],
+        },
+        {
+          name: 'Scene 3: Breakup',
+          summary: 'Amp Ch B for break-up. Master trim keeps the level neutral.',
+          blockStates: [
+            { blockId: 'compressor', state: 'off' },
+            { blockId: 'amp', state: { channel: 'B' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'chorus', state: { bypass: 'on', overrides: [{ name: 'Depth', value: '14%' }] } },
+            { blockId: 'delay', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '14%' }] } },
+            { blockId: 'reverb', state: 'on' },
+          ],
+        },
+      ],
+      checks: [
+        'Bright cap modeled on the AC30 Top Boost — defeat amp Bright switch if it gets too zingy on a Strat.',
+        'Cab proximity at default; raise IR 1 mic position by 1-2 inches to soften the top.',
+      ],
+    },
   },
   {
     id: 'plexi-crunch',
@@ -892,6 +1271,132 @@ const presetFamilies: PresetFamily[] = [
       { name: 'Scene 2: Wide Solo', note: 'Stereo delay engaged, upper mids lifted slightly, reverb predelay set long enough for clarity.' },
       { name: 'Scene 3: Tap Feature', note: 'Delay feedback and mix raised for tapped or legato phrases, lows trimmed before the delay.' },
     ],
+    buildSheet: {
+      globals: [
+        { label: 'Tempo', value: '116 BPM' },
+        { label: 'Input 1 Gate', value: '-65 dB' },
+        { label: 'Output 1', value: 'Stereo line-level' },
+      ],
+      blocks: [
+        {
+          blockId: 'drive',
+          type: 'T808 OD (boost)',
+          channels: [
+            { channel: 'A', role: 'Sustain push, low drive high level.' },
+          ],
+          params: [
+            { name: 'Drive', value: '2.0' },
+            { name: 'Tone', value: '6.0' },
+            { name: 'Level', value: '7.0' },
+            { name: 'Mix', value: '100%' },
+          ],
+        },
+        {
+          blockId: 'amp',
+          type: 'Brown Pre (hot-rodded brown)',
+          channels: [
+            { channel: 'A', role: 'Lead — singing sustain with controlled lows.' },
+          ],
+          params: [
+            { name: 'Drive', value: '6.5' },
+            { name: 'Master', value: '5.5' },
+            { name: 'Bass', value: '4.5' },
+            { name: 'Mid', value: '6.5' },
+            { name: 'Treble', value: '5.5' },
+            { name: 'Presence', value: '6.0' },
+            { name: 'Depth', value: '5.0' },
+          ],
+        },
+        {
+          blockId: 'cab',
+          type: 'DynaCab 4x12 Greenback',
+          params: [
+            { name: 'IR 1', value: 'SM57 cap-edge' },
+            { name: 'IR 2', value: 'R-121 off axis' },
+            { name: 'IR 2 Level', value: '-3.5 dB' },
+            { name: 'Low Cut', value: '95 Hz' },
+            { name: 'High Cut', value: '8.5 kHz' },
+          ],
+        },
+        {
+          blockId: 'parametric-eq',
+          type: '5-band PEQ',
+          params: [
+            { name: 'Band 1', value: '200 Hz, -2 dB, Q 1.2' },
+            { name: 'Band 2', value: '2.4 kHz, +1.5 dB, Q 1.0', note: 'Upper-mid presence bump.' },
+            { name: 'Band 3', value: '5.0 kHz, +1 dB shelf' },
+            { name: 'Output Level', value: '0.0 dB' },
+          ],
+        },
+        {
+          blockId: 'delay',
+          type: 'Stereo Tape',
+          params: [
+            { name: 'Time L', value: '1/4 dotted' },
+            { name: 'Time R', value: '1/2 (slap)' },
+            { name: 'Feedback', value: '28%' },
+            { name: 'Mix', value: '14%' },
+            { name: 'Low Cut', value: '300 Hz' },
+            { name: 'High Cut', value: '4.0 kHz' },
+            { name: 'Drive', value: '20%' },
+          ],
+        },
+        {
+          blockId: 'reverb',
+          type: 'London Plate',
+          params: [
+            { name: 'Time', value: '2.6 s' },
+            { name: 'Predelay', value: '45 ms', note: 'Keeps fast phrases on top of the wash.' },
+            { name: 'Mix', value: '20%' },
+            { name: 'Low Cut', value: '250 Hz' },
+            { name: 'High Cut', value: '7.0 kHz' },
+            { name: 'Diffusion', value: '70%' },
+          ],
+        },
+      ],
+      scenes: [
+        {
+          name: 'Scene 1: Crunch Lead',
+          summary: 'Boost off, delay tucked under, plate moderate.',
+          blockStates: [
+            { blockId: 'drive', state: 'off' },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'parametric-eq', state: 'on' },
+            { blockId: 'delay', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '10%' }] } },
+            { blockId: 'reverb', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '16%' }] } },
+          ],
+        },
+        {
+          name: 'Scene 2: Wide Solo',
+          summary: 'Boost on, wide delay opens. Upper-mid PEQ a touch hotter.',
+          blockStates: [
+            { blockId: 'drive', state: 'on' },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'parametric-eq', state: { bypass: 'on', overrides: [{ name: 'Band 2', value: '2.4 kHz, +2.5 dB, Q 1.0' }] } },
+            { blockId: 'delay', state: 'on' },
+            { blockId: 'reverb', state: { bypass: 'on', overrides: [{ name: 'Predelay', value: '60 ms' }] } },
+          ],
+        },
+        {
+          name: 'Scene 3: Tap Feature',
+          summary: 'Lows trimmed pre-delay; feedback and mix raised for legato phrases.',
+          blockStates: [
+            { blockId: 'drive', state: 'on' },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'parametric-eq', state: { bypass: 'on', overrides: [{ name: 'Band 1', value: '200 Hz, -3.5 dB, Q 1.2' }] } },
+            { blockId: 'delay', state: { bypass: 'on', overrides: [{ name: 'Feedback', value: '40%' }, { name: 'Mix', value: '24%' }] } },
+            { blockId: 'reverb', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '24%' }] } },
+          ],
+        },
+      ],
+      checks: [
+        'If using a Strat, lower Depth on the amp by 1.0 to keep low E from getting flubby.',
+        'PEQ presence bump should be backed off if the amp Treble is already > 6.',
+      ],
+    },
   },
   {
     id: 'fusion-liquid-lead',
@@ -909,6 +1414,141 @@ const presetFamilies: PresetFamily[] = [
       { name: 'Scene 2: Legato', note: 'Delay ducking relaxed and gain raised slightly for fluid lines.' },
       { name: 'Scene 3: Chord Lead', note: 'Gain reduced, reverb darker, mids kept broad so voicings do not smear.' },
     ],
+    buildSheet: {
+      globals: [
+        { label: 'Tempo', value: '102 BPM' },
+        { label: 'Input 1 Gate', value: '-70 dB' },
+        { label: 'Output 1', value: 'Stereo line-level' },
+      ],
+      blocks: [
+        {
+          blockId: 'compressor',
+          type: 'Studio C (transparent leveler)',
+          params: [
+            { name: 'Ratio', value: '3.0 : 1' },
+            { name: 'Threshold', value: '-18 dB' },
+            { name: 'Attack', value: '15 ms' },
+            { name: 'Release', value: '120 ms' },
+            { name: 'Level', value: '+2 dB' },
+          ],
+        },
+        {
+          blockId: 'drive',
+          type: 'BB Pre (boutique mid push)',
+          params: [
+            { name: 'Drive', value: '2.0' },
+            { name: 'Tone', value: '5.5' },
+            { name: 'Level', value: '6.5' },
+            { name: 'Bass', value: '5.5', note: 'Adds body for clean fusion voicings.' },
+          ],
+        },
+        {
+          blockId: 'amp',
+          type: 'Class-A 30W Brilliant',
+          channels: [
+            { channel: 'A', role: 'Smooth fusion lead.' },
+            { channel: 'B', role: 'Legato — Drive +0.5.' },
+          ],
+          params: [
+            { name: 'Channel A: Drive', value: '5.5' },
+            { name: 'Channel B: Drive', value: '6.0' },
+            { name: 'Master', value: '6.5' },
+            { name: 'Bass', value: '4.0' },
+            { name: 'Mid', value: '6.0' },
+            { name: 'Treble', value: '5.0' },
+            { name: 'Cut', value: '4.5' },
+          ],
+        },
+        {
+          blockId: 'cab',
+          type: 'DynaCab 2x12 Heart-Key',
+          params: [
+            { name: 'IR 1', value: 'R-121 ribbon' },
+            { name: 'IR 2', value: 'C414 6 in off-axis' },
+            { name: 'IR 2 Level', value: '-5 dB' },
+            { name: 'High Cut', value: '8.0 kHz' },
+          ],
+        },
+        {
+          blockId: 'parametric-eq',
+          type: '5-band PEQ',
+          params: [
+            { name: 'Band 1', value: '180 Hz, -1 dB, Q 1.0' },
+            { name: 'Band 2', value: '900 Hz, +1 dB, Q 0.8', note: 'Vocal mid bloom.' },
+            { name: 'Band 3', value: '6.0 kHz, -1.5 dB shelf', note: 'Tames bridge-pickup zing.' },
+          ],
+        },
+        {
+          blockId: 'delay',
+          type: 'Stereo Digital (ducked)',
+          params: [
+            { name: 'Time L', value: '1/4' },
+            { name: 'Time R', value: '1/4 dotted' },
+            { name: 'Feedback', value: '30%' },
+            { name: 'Mix', value: '20%' },
+            { name: 'Ducker Threshold', value: '-18 dB', note: 'Strong ducking keeps fast lines clear.' },
+            { name: 'Ducker Release', value: '350 ms' },
+          ],
+        },
+        {
+          blockId: 'reverb',
+          type: 'London Plate',
+          params: [
+            { name: 'Time', value: '2.4 s' },
+            { name: 'Predelay', value: '40 ms' },
+            { name: 'Mix', value: '18%' },
+            { name: 'Mod Depth', value: '10%' },
+            { name: 'Low Cut', value: '250 Hz' },
+            { name: 'High Cut', value: '7.5 kHz' },
+          ],
+        },
+      ],
+      scenes: [
+        {
+          name: 'Scene 1: Smooth',
+          summary: 'Subtle comp + drive. Amp Ch A. Delay ducking heavy.',
+          blockStates: [
+            { blockId: 'compressor', state: 'on' },
+            { blockId: 'drive', state: 'on' },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'parametric-eq', state: 'on' },
+            { blockId: 'delay', state: 'on' },
+            { blockId: 'reverb', state: 'on' },
+          ],
+        },
+        {
+          name: 'Scene 2: Legato',
+          summary: 'Amp Ch B (Drive +0.5). Delay ducking relaxed for fluid lines.',
+          blockStates: [
+            { blockId: 'compressor', state: 'on' },
+            { blockId: 'drive', state: 'on' },
+            { blockId: 'amp', state: { channel: 'B' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'parametric-eq', state: 'on' },
+            { blockId: 'delay', state: { bypass: 'on', overrides: [{ name: 'Ducker Threshold', value: '-30 dB' }] } },
+            { blockId: 'reverb', state: 'on' },
+          ],
+        },
+        {
+          name: 'Scene 3: Chord Lead',
+          summary: 'Gain reduced, plate darker so voicings stay readable.',
+          blockStates: [
+            { blockId: 'compressor', state: 'on' },
+            { blockId: 'drive', state: 'off' },
+            { blockId: 'amp', state: { channel: 'A', overrides: [{ name: 'Channel A: Drive', value: '4.5' }] } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'parametric-eq', state: 'on' },
+            { blockId: 'delay', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '14%' }] } },
+            { blockId: 'reverb', state: { bypass: 'on', overrides: [{ name: 'High Cut', value: '5.0 kHz' }, { name: 'Mix', value: '14%' }] } },
+          ],
+        },
+      ],
+      checks: [
+        'Cab IR 2 (off-axis condenser) controls the airy top — drop another -2 dB if the lead gets glassy.',
+        'Reverb Mod Depth adds breath; raise to 18% for hold notes, drop to 0 for staccato lines.',
+      ],
+    },
   },
   {
     id: 'boutique-ods',
@@ -926,6 +1566,133 @@ const presetFamilies: PresetFamily[] = [
       { name: 'Scene 2: Overdrive', note: 'Drive or amp channel gain raised; mids stay full, bass trimmed before the cab.' },
       { name: 'Scene 3: Singing Lead', note: 'Delay and plate added with output boost, treble kept smooth.' },
     ],
+    buildSheet: {
+      globals: [
+        { label: 'Tempo', value: '105 BPM' },
+        { label: 'Input 1 Gate', value: '-65 dB' },
+        { label: 'Output 1', value: 'Stereo line-level' },
+      ],
+      blocks: [
+        {
+          blockId: 'compressor',
+          type: 'Studio C (transparent leveler)',
+          params: [
+            { name: 'Ratio', value: '2.5 : 1' },
+            { name: 'Threshold', value: '-16 dB' },
+            { name: 'Attack', value: '12 ms' },
+            { name: 'Release', value: '110 ms' },
+            { name: 'Level', value: '+1.5 dB' },
+          ],
+        },
+        {
+          blockId: 'drive',
+          type: 'BB Pre / Bludo Drive (ODS-flavored)',
+          channels: [
+            { channel: 'A', role: 'Overdrive scene; bypassed for clean.' },
+          ],
+          params: [
+            { name: 'Drive', value: '4.0' },
+            { name: 'Tone', value: '5.5' },
+            { name: 'Level', value: '6.0' },
+            { name: 'Bass', value: '5.5' },
+          ],
+        },
+        {
+          blockId: 'amp',
+          type: 'Bludojr / Dumble ODS Lead',
+          channels: [
+            { channel: 'A', role: 'Clean / cleanish — Drive trimmed.' },
+            { channel: 'B', role: 'Overdrive — ODS Lead switch ON.' },
+          ],
+          params: [
+            { name: 'Channel A: Drive', value: '3.5' },
+            { name: 'Channel A: Master', value: '6.5' },
+            { name: 'Channel B: Drive', value: '6.0' },
+            { name: 'Channel B: Master', value: '5.5' },
+            { name: 'Bass', value: '5.0' },
+            { name: 'Mid', value: '6.5', note: 'ODS vocal mids — keep above 6.' },
+            { name: 'Treble', value: '5.5' },
+            { name: 'Presence', value: '5.5' },
+          ],
+        },
+        {
+          blockId: 'cab',
+          type: 'DynaCab 2x12 Texas Star',
+          params: [
+            { name: 'IR 1', value: 'SM57 cap-edge' },
+            { name: 'IR 2', value: 'R-121 ribbon, on axis' },
+            { name: 'IR 2 Level', value: '-2 dB' },
+            { name: 'Low Cut', value: '95 Hz' },
+            { name: 'High Cut', value: '8.5 kHz' },
+          ],
+        },
+        {
+          blockId: 'delay',
+          type: 'Stereo Analog',
+          params: [
+            { name: 'Time L', value: '1/4' },
+            { name: 'Time R', value: '1/4 dotted' },
+            { name: 'Feedback', value: '24%' },
+            { name: 'Mix', value: '15%' },
+            { name: 'Low Cut', value: '280 Hz' },
+            { name: 'High Cut', value: '4.5 kHz' },
+          ],
+        },
+        {
+          blockId: 'reverb',
+          type: 'Studio Plate',
+          params: [
+            { name: 'Time', value: '2.2 s' },
+            { name: 'Predelay', value: '30 ms' },
+            { name: 'Mix', value: '16%' },
+            { name: 'Low Cut', value: '230 Hz' },
+            { name: 'High Cut', value: '7.0 kHz' },
+          ],
+        },
+      ],
+      scenes: [
+        {
+          name: 'Scene 1: Cleanish',
+          summary: 'Drive off, Amp Ch A (clean). Comp keeps lines round.',
+          blockStates: [
+            { blockId: 'compressor', state: 'on' },
+            { blockId: 'drive', state: 'off' },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'delay', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '10%' }] } },
+            { blockId: 'reverb', state: 'on' },
+          ],
+        },
+        {
+          name: 'Scene 2: Overdrive',
+          summary: 'Drive Ch A + Amp Ch B (ODS Lead). Bass slightly trimmed.',
+          blockStates: [
+            { blockId: 'compressor', state: 'on' },
+            { blockId: 'drive', state: { channel: 'A' } },
+            { blockId: 'amp', state: { channel: 'B', overrides: [{ name: 'Bass', value: '4.5' }] } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'delay', state: 'on' },
+            { blockId: 'reverb', state: 'on' },
+          ],
+        },
+        {
+          name: 'Scene 3: Singing Lead',
+          summary: 'Output bump via amp Master; delay + plate widen the lead.',
+          blockStates: [
+            { blockId: 'compressor', state: 'off' },
+            { blockId: 'drive', state: { channel: 'A', overrides: [{ name: 'Level', value: '7.0' }] } },
+            { blockId: 'amp', state: { channel: 'B', overrides: [{ name: 'Channel B: Master', value: '6.0' }] } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'delay', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '22%' }, { name: 'Feedback', value: '34%' }] } },
+            { blockId: 'reverb', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '22%' }] } },
+          ],
+        },
+      ],
+      checks: [
+        'ODS Lead switch is what makes the channel sing — confirm Mid is above 6.0.',
+        'If using a humbucker, lower the front Drive block by 1.0 to keep transients intact.',
+      ],
+    },
   },
   {
     id: 'modern-metal-tight',
@@ -1107,6 +1874,129 @@ const presetFamilies: PresetFamily[] = [
       { name: 'Scene 2: Virtual Capo', note: 'Pitch block on for conservative shifts, gain reduced slightly to preserve attack.' },
       { name: 'Scene 3: Chorus Hook', note: 'EQ broadens upper mids and output lifts without adding extra ambience.' },
     ],
+    buildSheet: {
+      globals: [
+        { label: 'Tempo', value: '90 BPM', note: 'Tight slow rhythm.' },
+        { label: 'Input 1 Gate', value: '-55 dB', note: 'Pre-block gate for hum control.' },
+        { label: 'Output 1', value: 'Stereo line-level' },
+      ],
+      blocks: [
+        {
+          blockId: 'pitch',
+          type: 'Virtual Capo (Polyphonic)',
+          channels: [
+            { channel: 'A', role: 'Off — native tuning.' },
+            { channel: 'B', role: '−2 semitones for Virtual Capo scene.' },
+          ],
+          params: [
+            { name: 'Pitch', value: '0 semitones (Ch A) / −2 (Ch B)' },
+            { name: 'Mix', value: '100%' },
+            { name: 'Detune', value: 'OFF' },
+            { name: 'Tracking', value: 'Polyphonic' },
+          ],
+          note: 'Use only if changing tuning per scene; default = bypassed.',
+        },
+        {
+          blockId: 'gate-expander',
+          type: 'Intelligent Gate',
+          params: [
+            { name: 'Threshold', value: '-50 dB' },
+            { name: 'Ratio', value: '10.0 : 1' },
+            { name: 'Attack', value: '1 ms' },
+            { name: 'Release', value: '100 ms' },
+            { name: 'Hold', value: '15 ms' },
+          ],
+        },
+        {
+          blockId: 'drive',
+          type: 'Precision Drive (tightener)',
+          params: [
+            { name: 'Drive', value: '1.5' },
+            { name: 'Tone', value: '6.0' },
+            { name: 'Level', value: '9.0' },
+            { name: 'Bright', value: '6.5', note: 'Adds attack on low strings.' },
+            { name: 'Attack', value: '6.0' },
+          ],
+        },
+        {
+          blockId: 'amp',
+          type: '5153 Red (Modern High-Gain)',
+          channels: [{ channel: 'A', role: 'Rhythm chug.' }],
+          params: [
+            { name: 'Drive', value: '6.0' },
+            { name: 'Master', value: '4.0' },
+            { name: 'Bass', value: '3.5', note: 'Low Bass for tight low-tuned riffs.' },
+            { name: 'Mid', value: '5.5' },
+            { name: 'Treble', value: '6.5' },
+            { name: 'Presence', value: '6.0' },
+            { name: 'Depth', value: '6.5' },
+          ],
+        },
+        {
+          blockId: 'cab',
+          type: 'DynaCab 4x12 5153 Stealth',
+          params: [
+            { name: 'IR 1', value: 'SM57 cap-edge' },
+            { name: 'IR 2', value: 'MD-421 off-axis' },
+            { name: 'IR 2 Level', value: '-3.5 dB' },
+            { name: 'Low Cut', value: '90 Hz' },
+            { name: 'High Cut', value: '7.0 kHz' },
+          ],
+        },
+        {
+          blockId: 'parametric-eq',
+          type: '5-band PEQ',
+          params: [
+            { name: 'Band 1', value: '220 Hz, -3 dB, Q 1.5', note: 'Cuts low-mid woof on dropped strings.' },
+            { name: 'Band 2', value: '650 Hz, -1.5 dB, Q 2.0' },
+            { name: 'Band 3', value: '2.8 kHz, +1 dB, Q 1.0' },
+            { name: 'Output Level', value: '0.0 dB' },
+          ],
+        },
+      ],
+      scenes: [
+        {
+          name: 'Scene 1: Native Tuning',
+          summary: 'Pitch bypassed, gate firm. The default for downtuned guitars.',
+          blockStates: [
+            { blockId: 'pitch', state: 'off' },
+            { blockId: 'gate-expander', state: 'on' },
+            { blockId: 'drive', state: 'on' },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'parametric-eq', state: 'on' },
+          ],
+        },
+        {
+          name: 'Scene 2: Virtual Capo',
+          summary: 'Pitch Ch B (−2). Amp gain reduced to preserve attack.',
+          blockStates: [
+            { blockId: 'pitch', state: { channel: 'B' } },
+            { blockId: 'gate-expander', state: 'on' },
+            { blockId: 'drive', state: 'on' },
+            { blockId: 'amp', state: { channel: 'A', overrides: [{ name: 'Drive', value: '5.5' }] } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'parametric-eq', state: 'on' },
+          ],
+        },
+        {
+          name: 'Scene 3: Chorus Hook',
+          summary: 'Upper-mid bump on PEQ, output lift for hooks.',
+          blockStates: [
+            { blockId: 'pitch', state: 'off' },
+            { blockId: 'gate-expander', state: 'on' },
+            { blockId: 'drive', state: 'on' },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'parametric-eq', state: { bypass: 'on', overrides: [{ name: 'Band 3', value: '2.8 kHz, +2 dB, Q 1.0' }, { name: 'Output Level', value: '+1.0 dB' }] } },
+          ],
+        },
+      ],
+      checks: [
+        'Pitch block latency adds ~7 ms — bypass it on rhythm parts where possible.',
+        'PEQ Band 1 cut is the single most impactful low-tuned-clarity move.',
+      ],
+    },
   },
   {
     id: 'doom-fuzz-ritual',
@@ -1150,6 +2040,165 @@ const presetFamilies: PresetFamily[] = [
       { name: 'Scene 2: Octave Lift', note: 'Drive tone opened and delay added for upper-register riffs.' },
       { name: 'Scene 3: Feedback', note: 'Reverb and delay feedback raised for held notes, gate relaxed.' },
     ],
+    buildSheet: {
+      globals: [
+        { label: 'Tempo', value: '70 BPM', note: 'Slow doom — drives delay sync.' },
+        { label: 'Input 1 Gate', value: '-50 dB' },
+        { label: 'Output 1', value: 'Stereo wide' },
+      ],
+      blocks: [
+        {
+          blockId: 'gate-expander',
+          type: 'Multiband Gate',
+          params: [
+            { name: 'Threshold', value: '-48 dB' },
+            { name: 'Ratio', value: '6.0 : 1' },
+            { name: 'Attack', value: '2 ms' },
+            { name: 'Release', value: '180 ms' },
+            { name: 'Hold', value: '40 ms' },
+          ],
+        },
+        {
+          blockId: 'volume-pan',
+          type: 'Volume/Pan (clean anchor lane)',
+          params: [
+            { name: 'Level', value: '-6.0 dB' },
+            { name: 'Pan', value: 'Centre' },
+          ],
+          note: 'Sets the dry attack lane level before merge.',
+        },
+        {
+          blockId: 'drive',
+          type: 'Big Muff (Fuzz mass lane)',
+          channels: [
+            { channel: 'A', role: 'Default fuzz.' },
+            { channel: 'B', role: 'Octave Lift — Tone opened.' },
+          ],
+          params: [
+            { name: 'Drive', value: '7.5' },
+            { name: 'Tone', value: '4.5' },
+            { name: 'Level', value: '6.0' },
+            { name: 'Mix', value: '100%' },
+          ],
+        },
+        {
+          blockId: 'filter',
+          type: 'Lowpass + Highpass (Fuzz row shaping)',
+          params: [
+            { name: 'Mode', value: 'Bandpass' },
+            { name: 'Low Cut', value: '130 Hz', note: 'Trim sub-fuzz mud.' },
+            { name: 'High Cut', value: '5.5 kHz', note: 'Trim fizz before merge.' },
+            { name: 'Q', value: '0.7' },
+          ],
+        },
+        {
+          blockId: 'mixer',
+          type: 'Mixer (clean + fuzz blend)',
+          params: [
+            { name: 'In 1 Level (clean lane)', value: '-3.0 dB' },
+            { name: 'In 2 Level (fuzz lane)', value: '0.0 dB' },
+            { name: 'In 1 Pan', value: 'Centre' },
+            { name: 'In 2 Pan', value: 'Wide stereo' },
+          ],
+        },
+        {
+          blockId: 'amp',
+          type: 'Bassguy Clean Bright (low-gain platform)',
+          channels: [{ channel: 'A', role: 'Clean amp — fuzz does the saturation.' }],
+          params: [
+            { name: 'Drive', value: '3.0' },
+            { name: 'Master', value: '6.5' },
+            { name: 'Bass', value: '5.0' },
+            { name: 'Mid', value: '6.5' },
+            { name: 'Treble', value: '4.5' },
+            { name: 'Presence', value: '4.0' },
+          ],
+        },
+        {
+          blockId: 'cab',
+          type: 'DynaCab 4x12 1960TV',
+          params: [
+            { name: 'IR 1', value: 'R-121 ribbon, on axis' },
+            { name: 'Low Cut', value: '80 Hz' },
+            { name: 'High Cut', value: '6.5 kHz', note: 'Dark cab; fuzz needs heavy top trim.' },
+          ],
+        },
+        {
+          blockId: 'delay',
+          type: 'Mono Tape',
+          params: [
+            { name: 'Time L', value: '1/2' },
+            { name: 'Feedback', value: '40%' },
+            { name: 'Mix', value: '18%' },
+            { name: 'Drive', value: '30%' },
+            { name: 'Wow/Flutter', value: '25%' },
+          ],
+        },
+        {
+          blockId: 'reverb',
+          type: 'Cavern (dark long reverb)',
+          params: [
+            { name: 'Time', value: '4.5 s' },
+            { name: 'Predelay', value: '40 ms' },
+            { name: 'Mix', value: '24%' },
+            { name: 'Low Cut', value: '180 Hz' },
+            { name: 'High Cut', value: '5.0 kHz' },
+          ],
+        },
+      ],
+      scenes: [
+        {
+          name: 'Scene 1: Monolith',
+          summary: 'Heavy fuzz lane dominates. Reverb dark, delay tucked.',
+          blockStates: [
+            { blockId: 'gate-expander', state: 'on' },
+            { blockId: 'volume-pan', state: 'on' },
+            { blockId: 'drive', state: { channel: 'A' } },
+            { blockId: 'filter', state: 'on' },
+            { blockId: 'mixer', state: 'on' },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'delay', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '12%' }] } },
+            { blockId: 'reverb', state: 'on' },
+          ],
+        },
+        {
+          name: 'Scene 2: Octave Lift',
+          summary: 'Drive Ch B (Tone open), delay engaged for upper-register lines.',
+          blockStates: [
+            { blockId: 'gate-expander', state: 'on' },
+            { blockId: 'volume-pan', state: 'on' },
+            { blockId: 'drive', state: { channel: 'B', overrides: [{ name: 'Tone', value: '6.5' }] } },
+            { blockId: 'filter', state: { bypass: 'on', overrides: [{ name: 'High Cut', value: '7.0 kHz' }] } },
+            { blockId: 'mixer', state: 'on' },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'delay', state: 'on' },
+            { blockId: 'reverb', state: 'on' },
+          ],
+        },
+        {
+          name: 'Scene 3: Feedback',
+          summary: 'Gate relaxed for sustained feedback. Reverb + delay feedback ramped.',
+          blockStates: [
+            { blockId: 'gate-expander', state: { bypass: 'on', overrides: [{ name: 'Release', value: '400 ms' }, { name: 'Threshold', value: '-60 dB' }] } },
+            { blockId: 'volume-pan', state: 'on' },
+            { blockId: 'drive', state: { channel: 'A' } },
+            { blockId: 'filter', state: 'on' },
+            { blockId: 'mixer', state: 'on' },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'delay', state: { bypass: 'on', overrides: [{ name: 'Feedback', value: '60%' }, { name: 'Mix', value: '26%' }] } },
+            { blockId: 'reverb', state: { bypass: 'on', overrides: [{ name: 'Time', value: '7.0 s' }, { name: 'Mix', value: '32%' }] } },
+          ],
+        },
+      ],
+      checks: [
+        'Build clean anchor on grid row 1, fuzz row on row 2 — Mixer collects both before the amp.',
+        'Filter on the fuzz row is the single most important mud control; check 130 Hz low cut isolated.',
+        'On FM3, omit IR 2 in the Cab block to keep DSP free for Plex Delay if you add one.',
+      ],
+    },
   },
   {
     id: 'ambient-shimmer-pad',
@@ -1370,6 +2419,154 @@ const presetFamilies: PresetFamily[] = [
       { name: 'Scene 2: Build', note: 'Drive low gain, delay feedback raised, loop-ready level kept controlled.' },
       { name: 'Scene 3: Crest', note: 'Drive and amp gain lifted, reverb low cut high, output level matched to band peak.' },
     ],
+    buildSheet: {
+      globals: [
+        { label: 'Tempo', value: '82 BPM' },
+        { label: 'Input 1 Gate', value: 'OFF', note: 'Long tails need no gate.' },
+        { label: 'Output 1', value: 'Stereo wide' },
+        { label: 'Pedal 1', value: 'Volume swell (Expression 1)' },
+      ],
+      blocks: [
+        {
+          blockId: 'volume-pan',
+          type: 'Volume/Pan',
+          params: [
+            { name: 'Level', value: '-INF → 0.0 dB (Expression)' },
+            { name: 'Taper', value: 'Audio (log)' },
+          ],
+        },
+        {
+          blockId: 'drive',
+          type: 'Pi Fuzz (low-gain)',
+          channels: [
+            { channel: 'A', role: 'Off — clean swells.' },
+            { channel: 'B', role: 'Low-gain push for Build.' },
+            { channel: 'C', role: 'Higher-gain Crest.' },
+          ],
+          params: [
+            { name: 'Channel B: Drive', value: '3.0' },
+            { name: 'Channel C: Drive', value: '6.0' },
+            { name: 'Tone', value: '5.0' },
+            { name: 'Level', value: '6.5' },
+          ],
+        },
+        {
+          blockId: 'amp',
+          type: 'AC20 / Class-A clean platform',
+          channels: [{ channel: 'A', role: 'Clean platform — drive does saturation.' }],
+          params: [
+            { name: 'Drive', value: '4.0' },
+            { name: 'Master', value: '7.5' },
+            { name: 'Bass', value: '4.5' },
+            { name: 'Mid', value: '6.0' },
+            { name: 'Treble', value: '5.0' },
+          ],
+        },
+        {
+          blockId: 'cab',
+          type: 'DynaCab 2x12 Blue Alnico',
+          params: [
+            { name: 'IR 1', value: 'R-121 ribbon' },
+            { name: 'Low Cut', value: '90 Hz' },
+            { name: 'High Cut', value: '8.0 kHz' },
+          ],
+        },
+        {
+          blockId: 'delay',
+          type: 'Stereo Digital (Rhythmic delay lane)',
+          params: [
+            { name: 'Time L', value: '1/8 dotted' },
+            { name: 'Time R', value: '1/4' },
+            { name: 'Feedback', value: '40%' },
+            { name: 'Mix', value: '40%', note: 'Lane-only signal; Kill Dry on this parallel lane.' },
+            { name: 'Kill Dry', value: 'ON' },
+            { name: 'Low Cut', value: '300 Hz' },
+            { name: 'High Cut', value: '5.0 kHz' },
+          ],
+        },
+        {
+          blockId: 'reverb',
+          type: 'Cavern (Reverb bed lane)',
+          params: [
+            { name: 'Time', value: '6.0 s' },
+            { name: 'Predelay', value: '60 ms' },
+            { name: 'Mix', value: '50%', note: 'Lane-only; Kill Dry ON.' },
+            { name: 'Kill Dry', value: 'ON' },
+            { name: 'Mod Depth', value: '15%' },
+            { name: 'Low Cut', value: '250 Hz' },
+            { name: 'High Cut', value: '5.5 kHz' },
+          ],
+        },
+        {
+          blockId: 'looper',
+          type: 'Looper (post-bed capture)',
+          params: [
+            { name: 'Length', value: '60 s' },
+            { name: 'Quantize', value: 'OFF' },
+            { name: 'Mode', value: 'Stereo' },
+          ],
+          note: 'Last in chain so it captures full reverb tail.',
+        },
+        {
+          blockId: 'mixer',
+          type: 'Mixer (3-lane build mix)',
+          params: [
+            { name: 'In 1 (Dry phrase)', value: '0.0 dB, Centre' },
+            { name: 'In 2 (Rhythmic delay)', value: '-6.0 dB, Wide' },
+            { name: 'In 3 (Reverb bed)', value: '-9.0 dB, Wide' },
+          ],
+        },
+      ],
+      scenes: [
+        {
+          name: 'Scene 1: Swell',
+          summary: 'Drive off. Volume pedal does the swell. Bed lane low.',
+          blockStates: [
+            { blockId: 'volume-pan', state: 'on' },
+            { blockId: 'drive', state: 'off' },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'delay', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '30%' }] } },
+            { blockId: 'reverb', state: 'on' },
+            { blockId: 'looper', state: { bypass: 'on' } },
+            { blockId: 'mixer', state: 'on' },
+          ],
+        },
+        {
+          name: 'Scene 2: Build',
+          summary: 'Drive Ch B low gain. Delay feedback raised. Looper ready.',
+          blockStates: [
+            { blockId: 'volume-pan', state: 'on' },
+            { blockId: 'drive', state: { channel: 'B' } },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'delay', state: { bypass: 'on', overrides: [{ name: 'Feedback', value: '60%' }] } },
+            { blockId: 'reverb', state: 'on' },
+            { blockId: 'looper', state: 'on' },
+            { blockId: 'mixer', state: { overrides: [{ name: 'In 2 (Rhythmic delay)', value: '-3.0 dB, Wide' }] } },
+          ],
+        },
+        {
+          name: 'Scene 3: Crest',
+          summary: 'Drive Ch C. Reverb lane raised. Output matched to band peak.',
+          blockStates: [
+            { blockId: 'volume-pan', state: 'off' },
+            { blockId: 'drive', state: { channel: 'C' } },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'delay', state: 'on' },
+            { blockId: 'reverb', state: { bypass: 'on', overrides: [{ name: 'Low Cut', value: '350 Hz' }] } },
+            { blockId: 'looper', state: 'on' },
+            { blockId: 'mixer', state: { overrides: [{ name: 'In 3 (Reverb bed)', value: '-3.0 dB, Wide' }] } },
+          ],
+        },
+      ],
+      checks: [
+        'Kill Dry on Delay and Reverb lanes — critical for parallel summing.',
+        'Looper post-mixer captures the full bed; place it last in the dry-phrase row.',
+        'FM3 will struggle with all three lanes + Looper — drop the Reverb-bed lane on FM3.',
+      ],
+    },
   },
   {
     id: 'shoegaze-reverse-fuzz',
@@ -1418,6 +2615,155 @@ const presetFamilies: PresetFamily[] = [
       { name: 'Scene 2: Fuzz Wash', note: 'Drive on, delay mix high, flanger slow and wide after the repeats.' },
       { name: 'Scene 3: Collapse', note: 'Feedback and reverb time raised for transitions, output trimmed to avoid level spikes.' },
     ],
+    buildSheet: {
+      globals: [
+        { label: 'Tempo', value: '88 BPM' },
+        { label: 'Input 1 Gate', value: 'OFF', note: 'Sustained smear; no gate.' },
+        { label: 'Output 1', value: 'Stereo wide' },
+      ],
+      blocks: [
+        {
+          blockId: 'drive',
+          type: 'Big Muff (Fuzz source)',
+          channels: [
+            { channel: 'A', role: 'Off — clean reverse smear.' },
+            { channel: 'B', role: 'Wash — fuzz on.' },
+          ],
+          params: [
+            { name: 'Drive', value: '7.0' },
+            { name: 'Tone', value: '4.0' },
+            { name: 'Level', value: '6.5' },
+          ],
+        },
+        {
+          blockId: 'amp',
+          type: 'Clean platform (Class-A 30W)',
+          channels: [{ channel: 'A', role: 'Clean platform — fuzz does saturation.' }],
+          params: [
+            { name: 'Drive', value: '4.0' },
+            { name: 'Master', value: '7.0' },
+            { name: 'Bass', value: '4.0' },
+            { name: 'Mid', value: '5.5' },
+            { name: 'Treble', value: '4.5' },
+          ],
+        },
+        {
+          blockId: 'cab',
+          type: 'DynaCab 2x12 Class-A 30W',
+          params: [
+            { name: 'IR 1', value: 'R-121 ribbon' },
+            { name: 'Low Cut', value: '85 Hz' },
+            { name: 'High Cut', value: '7.0 kHz', note: 'Darker top to keep fuzz musical.' },
+          ],
+        },
+        {
+          blockId: 'delay',
+          type: 'Reverse Delay (Reverse smear lane)',
+          params: [
+            { name: 'Time L', value: '1/2 (reversed)' },
+            { name: 'Feedback', value: '25%' },
+            { name: 'Mix', value: '60%', note: 'Lane-only; Kill Dry ON.' },
+            { name: 'Kill Dry', value: 'ON' },
+            { name: 'Low Cut', value: '300 Hz' },
+            { name: 'High Cut', value: '4.5 kHz' },
+          ],
+        },
+        {
+          blockId: 'flanger',
+          type: 'Stadium Flanger (Mod sweep lane)',
+          params: [
+            { name: 'Rate', value: '0.2 Hz', note: 'Slow.' },
+            { name: 'Depth', value: '60%' },
+            { name: 'Feedback', value: '40%' },
+            { name: 'Mix', value: '100%', note: 'Lane is wet only.' },
+            { name: 'Stereo Width', value: '100%' },
+            { name: 'Kill Dry', value: 'ON' },
+          ],
+        },
+        {
+          blockId: 'reverb',
+          type: 'Cathedral (Cloud width lane)',
+          params: [
+            { name: 'Time', value: '8.0 s' },
+            { name: 'Predelay', value: '80 ms' },
+            { name: 'Mix', value: '70%', note: 'Lane-only; Kill Dry ON.' },
+            { name: 'Kill Dry', value: 'ON' },
+            { name: 'Mod Depth', value: '25%' },
+            { name: 'Low Cut', value: '220 Hz' },
+            { name: 'High Cut', value: '6.0 kHz' },
+          ],
+        },
+        {
+          blockId: 'enhancer',
+          type: 'Stereo Enhancer (width)',
+          params: [
+            { name: 'Width', value: '+20%' },
+            { name: 'High Cut', value: '7.0 kHz' },
+            { name: 'Mode', value: 'Stereo' },
+          ],
+          note: 'Only on Cloud lane.',
+        },
+        {
+          blockId: 'mixer',
+          type: 'Mixer (4-lane texture mix)',
+          params: [
+            { name: 'In 1 (Dry anchor)', value: '-3.0 dB, Centre' },
+            { name: 'In 2 (Reverse smear)', value: '-3.0 dB, Wide' },
+            { name: 'In 3 (Mod sweep)', value: '-6.0 dB, Wide' },
+            { name: 'In 4 (Cloud width)', value: '-3.0 dB, Wide' },
+          ],
+        },
+      ],
+      scenes: [
+        {
+          name: 'Scene 1: Reverse Clean',
+          summary: 'Drive off. Reverse smear obvious; cloud moderate.',
+          blockStates: [
+            { blockId: 'drive', state: 'off' },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'delay', state: 'on' },
+            { blockId: 'flanger', state: { bypass: 'on', overrides: [{ name: 'Rate', value: '0.15 Hz' }] } },
+            { blockId: 'reverb', state: 'on' },
+            { blockId: 'enhancer', state: 'on' },
+            { blockId: 'mixer', state: 'on' },
+          ],
+        },
+        {
+          name: 'Scene 2: Fuzz Wash',
+          summary: 'Drive Ch B. Reverse smear and flanger both swell.',
+          blockStates: [
+            { blockId: 'drive', state: { channel: 'B' } },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'delay', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '80%' }] } },
+            { blockId: 'flanger', state: 'on' },
+            { blockId: 'reverb', state: 'on' },
+            { blockId: 'enhancer', state: 'on' },
+            { blockId: 'mixer', state: 'on' },
+          ],
+        },
+        {
+          name: 'Scene 3: Collapse',
+          summary: 'Reverse feedback and reverb time spike for transitions. Output trimmed.',
+          blockStates: [
+            { blockId: 'drive', state: { channel: 'B' } },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'delay', state: { bypass: 'on', overrides: [{ name: 'Feedback', value: '55%' }] } },
+            { blockId: 'flanger', state: 'on' },
+            { blockId: 'reverb', state: { bypass: 'on', overrides: [{ name: 'Time', value: '14.0 s' }, { name: 'Mix', value: '90%' }] } },
+            { blockId: 'enhancer', state: 'on' },
+            { blockId: 'mixer', state: { overrides: [{ name: 'In 1 (Dry anchor)', value: '-1.5 dB, Centre' }] } },
+          ],
+        },
+      ],
+      checks: [
+        'Kill Dry on all wet lanes (Delay, Flanger, Reverb) — critical for parallel summing.',
+        'On FM3, drop the Flanger lane; CPU and grid space are both tight.',
+        'Reverse delay model is in Multi-Delay → "Reversed Delay". Set it before assigning routing.',
+      ],
+    },
   },
   {
     id: 'funk-filter-machine',
@@ -1435,6 +2781,122 @@ const presetFamilies: PresetFamily[] = [
       { name: 'Scene 2: Muted Rhythm', note: 'Filter sensitivity reduced, low end trimmed, reverb shorter.' },
       { name: 'Scene 3: Solo Filter', note: 'Output lift, filter range opened, delay mix raised for single-note lines.' },
     ],
+    buildSheet: {
+      globals: [
+        { label: 'Tempo', value: '108 BPM' },
+        { label: 'Input 1 Gate', value: '-70 dB' },
+        { label: 'Output 1', value: 'Stereo line-level' },
+      ],
+      blocks: [
+        {
+          blockId: 'compressor',
+          type: 'Studio FET (1176-style)',
+          params: [
+            { name: 'Ratio', value: '4.0 : 1' },
+            { name: 'Threshold', value: '-14 dB' },
+            { name: 'Attack', value: '3 ms' },
+            { name: 'Release', value: '60 ms' },
+            { name: 'Level', value: '+2 dB' },
+          ],
+        },
+        {
+          blockId: 'filter',
+          type: 'Auto-Wah (Lowpass envelope)',
+          params: [
+            { name: 'Mode', value: 'Lowpass Envelope' },
+            { name: 'Envelope Depth', value: '70%' },
+            { name: 'Attack', value: '12 ms' },
+            { name: 'Release', value: '180 ms' },
+            { name: 'Frequency Low', value: '350 Hz' },
+            { name: 'Frequency High', value: '2.0 kHz' },
+            { name: 'Q', value: '2.5' },
+          ],
+        },
+        {
+          blockId: 'amp',
+          type: 'Tweed Bassman (clean)',
+          channels: [{ channel: 'A', role: 'Clean — funk transients intact.' }],
+          params: [
+            { name: 'Drive', value: '3.0' },
+            { name: 'Master', value: '7.0' },
+            { name: 'Bass', value: '5.5' },
+            { name: 'Mid', value: '7.0' },
+            { name: 'Treble', value: '5.5' },
+            { name: 'Presence', value: '5.0' },
+          ],
+        },
+        {
+          blockId: 'cab',
+          type: 'DynaCab 4x10 Bassguy RI',
+          params: [
+            { name: 'IR 1', value: 'SM57 cap-edge' },
+            { name: 'Low Cut', value: '100 Hz' },
+            { name: 'High Cut', value: '8.5 kHz' },
+          ],
+        },
+        {
+          blockId: 'delay',
+          type: 'Mono Tape Slap',
+          params: [
+            { name: 'Time L', value: '85 ms (absolute)' },
+            { name: 'Feedback', value: '10%' },
+            { name: 'Mix', value: '10%' },
+            { name: 'High Cut', value: '4.0 kHz' },
+          ],
+        },
+        {
+          blockId: 'reverb',
+          type: 'Small Spring',
+          params: [
+            { name: 'Time', value: '1.2 s' },
+            { name: 'Mix', value: '14%' },
+            { name: 'High Cut', value: '6.5 kHz' },
+          ],
+        },
+      ],
+      scenes: [
+        {
+          name: 'Scene 1: Quack',
+          summary: 'High envelope depth. Compressor even, ambience nearly dry.',
+          blockStates: [
+            { blockId: 'compressor', state: 'on' },
+            { blockId: 'filter', state: 'on' },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'delay', state: 'on' },
+            { blockId: 'reverb', state: 'on' },
+          ],
+        },
+        {
+          name: 'Scene 2: Muted Rhythm',
+          summary: 'Filter sensitivity reduced. Lows trimmed at the cab.',
+          blockStates: [
+            { blockId: 'compressor', state: 'on' },
+            { blockId: 'filter', state: { bypass: 'on', overrides: [{ name: 'Envelope Depth', value: '40%' }] } },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: { bypass: 'on', overrides: [{ name: 'Low Cut', value: '130 Hz' }] } },
+            { blockId: 'delay', state: 'on' },
+            { blockId: 'reverb', state: { bypass: 'on', overrides: [{ name: 'Time', value: '0.8 s' }] } },
+          ],
+        },
+        {
+          name: 'Scene 3: Solo Filter',
+          summary: 'Filter range opened, delay mix raised for single-note runs.',
+          blockStates: [
+            { blockId: 'compressor', state: 'on' },
+            { blockId: 'filter', state: { bypass: 'on', overrides: [{ name: 'Frequency High', value: '3.0 kHz' }] } },
+            { blockId: 'amp', state: { channel: 'A', overrides: [{ name: 'Master', value: '7.5' }] } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'delay', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '18%' }] } },
+            { blockId: 'reverb', state: 'on' },
+          ],
+        },
+      ],
+      checks: [
+        'Envelope Attack ~12 ms is the funk-quack sweet spot — much faster and it gates the pluck.',
+        'Compressor before filter, not after: smooths the envelope detector input.',
+      ],
+    },
   },
   {
     id: 'rotary-soul-lead',
@@ -1452,6 +2914,133 @@ const presetFamilies: PresetFamily[] = [
       { name: 'Scene 2: Fast Rotor', note: 'Fast speed engaged, output trimmed if the modulation adds perceived level.' },
       { name: 'Scene 3: Lead Rotary', note: 'Drive or amp gain raised slightly, delay and plate added after rotary.' },
     ],
+    buildSheet: {
+      globals: [
+        { label: 'Tempo', value: '92 BPM' },
+        { label: 'Input 1 Gate', value: '-72 dB' },
+        { label: 'Output 1', value: 'Stereo wide' },
+        { label: 'FC Pad', value: 'Layout 1 Pad 5 → Rotary Channel A/B' },
+      ],
+      blocks: [
+        {
+          blockId: 'compressor',
+          type: 'Studio C',
+          params: [
+            { name: 'Ratio', value: '2.5 : 1' },
+            { name: 'Threshold', value: '-16 dB' },
+            { name: 'Attack', value: '12 ms' },
+            { name: 'Release', value: '120 ms' },
+            { name: 'Level', value: '+1.5 dB' },
+          ],
+        },
+        {
+          blockId: 'amp',
+          type: 'Vibrato-Lux (warm Class-A)',
+          channels: [
+            { channel: 'A', role: 'Warm clean.' },
+            { channel: 'B', role: 'Lead Rotary — Drive +1.0.' },
+          ],
+          params: [
+            { name: 'Channel A: Drive', value: '4.0' },
+            { name: 'Channel B: Drive', value: '5.0' },
+            { name: 'Master', value: '7.0' },
+            { name: 'Bass', value: '5.0' },
+            { name: 'Mid', value: '6.0' },
+            { name: 'Treble', value: '5.0' },
+          ],
+        },
+        {
+          blockId: 'cab',
+          type: 'DynaCab 1x12 Vibrato-Lux',
+          params: [
+            { name: 'IR 1', value: 'R-121 ribbon' },
+            { name: 'Low Cut', value: '90 Hz' },
+            { name: 'High Cut', value: '8.0 kHz' },
+          ],
+        },
+        {
+          blockId: 'rotary',
+          type: 'Leslie 122 (Stereo)',
+          channels: [
+            { channel: 'A', role: 'Slow rotor.' },
+            { channel: 'B', role: 'Fast rotor.' },
+          ],
+          params: [
+            { name: 'Slow Speed (low)', value: '0.7 Hz' },
+            { name: 'Slow Speed (high)', value: '1.0 Hz' },
+            { name: 'Fast Speed (low)', value: '5.5 Hz' },
+            { name: 'Fast Speed (high)', value: '7.0 Hz' },
+            { name: 'Ramp Slow → Fast', value: '1.2 s', note: 'Real Leslie accel time.' },
+            { name: 'Ramp Fast → Slow', value: '2.0 s' },
+            { name: 'Mic Spacing', value: '50%' },
+            { name: 'Drive', value: '3.0' },
+          ],
+        },
+        {
+          blockId: 'delay',
+          type: 'Stereo Digital (short)',
+          params: [
+            { name: 'Time L', value: '1/8' },
+            { name: 'Time R', value: '1/4' },
+            { name: 'Feedback', value: '18%' },
+            { name: 'Mix', value: '12%', note: 'Mostly for stereo width.' },
+            { name: 'High Cut', value: '5.5 kHz' },
+          ],
+        },
+        {
+          blockId: 'reverb',
+          type: 'Medium Plate',
+          params: [
+            { name: 'Time', value: '2.2 s' },
+            { name: 'Predelay', value: '25 ms' },
+            { name: 'Mix', value: '16%' },
+            { name: 'High Cut', value: '7.5 kHz' },
+          ],
+        },
+      ],
+      scenes: [
+        {
+          name: 'Scene 1: Slow Rotor',
+          summary: 'Rotary Ch A. Amp warm. Delay quiet.',
+          blockStates: [
+            { blockId: 'compressor', state: 'on' },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'rotary', state: { channel: 'A' } },
+            { blockId: 'delay', state: 'on' },
+            { blockId: 'reverb', state: 'on' },
+          ],
+        },
+        {
+          name: 'Scene 2: Fast Rotor',
+          summary: 'Rotary Ch B. Output trimmed slightly to compensate for perceived level.',
+          blockStates: [
+            { blockId: 'compressor', state: 'on' },
+            { blockId: 'amp', state: { channel: 'A', overrides: [{ name: 'Master', value: '6.5' }] } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'rotary', state: { channel: 'B' } },
+            { blockId: 'delay', state: 'on' },
+            { blockId: 'reverb', state: 'on' },
+          ],
+        },
+        {
+          name: 'Scene 3: Lead Rotary',
+          summary: 'Amp Ch B (more drive). Rotary fast. Plate raised.',
+          blockStates: [
+            { blockId: 'compressor', state: 'off' },
+            { blockId: 'amp', state: { channel: 'B' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'rotary', state: { channel: 'B' } },
+            { blockId: 'delay', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '18%' }] } },
+            { blockId: 'reverb', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '22%' }] } },
+          ],
+        },
+      ],
+      checks: [
+        'Rotary channel switching uses the Slow→Fast ramp time — do not assign abrupt sources.',
+        'Mic Spacing controls perceived stereo width; lower for studio, higher for live.',
+      ],
+    },
   },
   {
     id: 'eighties-chorus-clean',
@@ -1469,6 +3058,123 @@ const presetFamilies: PresetFamily[] = [
       { name: 'Scene 2: Ballad', note: 'Delay and reverb mix raised, compressor sustain increased for clean lines.' },
       { name: 'Scene 3: Dry Pop', note: 'Chorus depth lower, delay short, low end tightened for rhythm parts.' },
     ],
+    buildSheet: {
+      globals: [
+        { label: 'Tempo', value: '110 BPM' },
+        { label: 'Input 1 Gate', value: '-72 dB' },
+        { label: 'Output 1', value: 'Stereo wide' },
+      ],
+      blocks: [
+        {
+          blockId: 'compressor',
+          type: 'Studio C (rack opto)',
+          params: [
+            { name: 'Ratio', value: '3.0 : 1' },
+            { name: 'Threshold', value: '-16 dB' },
+            { name: 'Attack', value: '15 ms' },
+            { name: 'Release', value: '100 ms' },
+            { name: 'Level', value: '+2.5 dB' },
+          ],
+        },
+        {
+          blockId: 'amp',
+          type: 'JC-120 / Roland Clean',
+          channels: [{ channel: 'A', role: 'Pristine clean — no breakup.' }],
+          params: [
+            { name: 'Drive', value: '2.5' },
+            { name: 'Master', value: '7.5' },
+            { name: 'Bass', value: '4.5' },
+            { name: 'Mid', value: '5.0' },
+            { name: 'Treble', value: '6.5' },
+            { name: 'Bright', value: 'ON' },
+          ],
+        },
+        {
+          blockId: 'cab',
+          type: 'DynaCab 2x12 Double-Verb',
+          params: [
+            { name: 'IR 1', value: 'C414 6 in off-axis' },
+            { name: 'Low Cut', value: '85 Hz' },
+            { name: 'High Cut', value: '10 kHz', note: '80s rack-bright top.' },
+          ],
+        },
+        {
+          blockId: 'chorus',
+          type: 'Tri-Chorus (Dimension D)',
+          params: [
+            { name: 'Rate', value: '0.6 Hz' },
+            { name: 'Depth', value: '22%' },
+            { name: 'Mix', value: '22%' },
+            { name: 'Stereo Width', value: '100%' },
+            { name: 'Mode', value: 'Tri (4-voice)' },
+          ],
+        },
+        {
+          blockId: 'delay',
+          type: 'Stereo Digital (TC 2290 style)',
+          params: [
+            { name: 'Time L', value: '1/4' },
+            { name: 'Time R', value: '380 ms' },
+            { name: 'Feedback', value: '28%' },
+            { name: 'Mix', value: '16%' },
+            { name: 'Mod Depth', value: '8%' },
+            { name: 'High Cut', value: '6.5 kHz' },
+          ],
+        },
+        {
+          blockId: 'reverb',
+          type: 'London Plate',
+          params: [
+            { name: 'Time', value: '2.0 s' },
+            { name: 'Predelay', value: '30 ms' },
+            { name: 'Mix', value: '18%' },
+            { name: 'High Cut', value: '8.5 kHz' },
+          ],
+        },
+      ],
+      scenes: [
+        {
+          name: 'Scene 1: Gloss',
+          summary: 'Wide shallow chorus, polished delay, modest plate.',
+          blockStates: [
+            { blockId: 'compressor', state: 'on' },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'chorus', state: 'on' },
+            { blockId: 'delay', state: 'on' },
+            { blockId: 'reverb', state: 'on' },
+          ],
+        },
+        {
+          name: 'Scene 2: Ballad',
+          summary: 'Delay and reverb opens. Comp release relaxed for sustain.',
+          blockStates: [
+            { blockId: 'compressor', state: { bypass: 'on', overrides: [{ name: 'Release', value: '180 ms' }] } },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'chorus', state: 'on' },
+            { blockId: 'delay', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '22%' }, { name: 'Feedback', value: '36%' }] } },
+            { blockId: 'reverb', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '26%' }] } },
+          ],
+        },
+        {
+          name: 'Scene 3: Dry Pop',
+          summary: 'Chorus depth halved. Delay short. Low cut raised for tight rhythm.',
+          blockStates: [
+            { blockId: 'compressor', state: 'on' },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: { bypass: 'on', overrides: [{ name: 'Low Cut', value: '120 Hz' }] } },
+            { blockId: 'chorus', state: { bypass: 'on', overrides: [{ name: 'Depth', value: '12%' }] } },
+            { blockId: 'delay', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '10%' }] } },
+            { blockId: 'reverb', state: 'on' },
+          ],
+        },
+      ],
+      checks: [
+        'JC-120 Bright cap is essential to the 80s rack vibe — leave it ON.',
+        'Tri-Chorus Mode = "Tri" gives 4-voice Dimension-D-style width; 2-voice is more conventional.',
+      ],
+    },
   },
   {
     id: 'bass-di-amp-blend',
@@ -1512,6 +3218,126 @@ const presetFamilies: PresetFamily[] = [
       { name: 'Scene 2: Driven Amp', note: 'Driven lane raised, compressor release tuned to groove tempo.' },
       { name: 'Scene 3: Pick Attack', note: 'Upper mids lifted and drive tone brightened for pick or aggressive fingerstyle.' },
     ],
+    buildSheet: {
+      globals: [
+        { label: 'Tempo', value: '95 BPM' },
+        { label: 'Input 1', value: 'Bass / Inst, gate -60 dB' },
+        { label: 'Output 1', value: 'Stereo line-level / DI feed to FOH' },
+      ],
+      blocks: [
+        {
+          blockId: 'compressor',
+          type: 'Studio Opto (shared comp)',
+          params: [
+            { name: 'Ratio', value: '4.0 : 1' },
+            { name: 'Threshold', value: '-14 dB' },
+            { name: 'Attack', value: '10 ms' },
+            { name: 'Release', value: '120 ms', note: 'Tune to groove — longer for slow, shorter for fast.' },
+            { name: 'Level', value: '+2 dB' },
+          ],
+        },
+        {
+          blockId: 'drive',
+          type: 'Blackglass 7K (bass-specific overdrive)',
+          channels: [
+            { channel: 'A', role: 'Driven scene grit.' },
+            { channel: 'B', role: 'Pick attack — Tone brightened.' },
+          ],
+          params: [
+            { name: 'Channel A: Drive', value: '4.0' },
+            { name: 'Channel B: Drive', value: '5.0' },
+            { name: 'Tone', value: '5.0' },
+            { name: 'Level', value: '6.0' },
+            { name: 'Mid', value: '6.0' },
+          ],
+        },
+        {
+          blockId: 'amp',
+          type: 'Bassguy SVT / Tweed Bass',
+          channels: [{ channel: 'A', role: 'Driven bass amp.' }],
+          params: [
+            { name: 'Drive', value: '5.5' },
+            { name: 'Master', value: '6.0' },
+            { name: 'Bass', value: '5.5' },
+            { name: 'Mid', value: '6.0' },
+            { name: 'Treble', value: '5.0' },
+            { name: 'Bright', value: 'OFF' },
+          ],
+        },
+        {
+          blockId: 'cab',
+          type: 'DynaCab 8x10 SV Bass',
+          params: [
+            { name: 'IR 1', value: 'MD-421 on axis' },
+            { name: 'IR 2', value: 'C414 6 in off-axis' },
+            { name: 'IR 2 Level', value: '-4 dB' },
+            { name: 'Low Cut', value: '50 Hz' },
+            { name: 'High Cut', value: '7.0 kHz' },
+          ],
+        },
+        {
+          blockId: 'mixer',
+          type: 'Mixer (DI + Amp blend)',
+          params: [
+            { name: 'In 1 Level (DI)', value: '-1.0 dB, Centre' },
+            { name: 'In 2 Level (Amp)', value: '-3.0 dB, Centre' },
+          ],
+        },
+        {
+          blockId: 'parametric-eq',
+          type: '5-band PEQ (post-blend trim)',
+          params: [
+            { name: 'Band 1', value: '180 Hz, -1.5 dB, Q 1.2', note: 'Trims low-mid bloom.' },
+            { name: 'Band 2', value: '850 Hz, +0.5 dB, Q 0.8' },
+            { name: 'Band 3', value: '2.5 kHz, +1 dB, Q 1.0', note: 'Pick attack lift in Scene 3.' },
+            { name: 'Output Level', value: '0.0 dB' },
+          ],
+        },
+      ],
+      scenes: [
+        {
+          name: 'Scene 1: Clean DI Blend',
+          summary: 'DI dominant. Drive lane bypassed. PEQ keeps low-mid clean.',
+          blockStates: [
+            { blockId: 'compressor', state: 'on' },
+            { blockId: 'drive', state: 'off' },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'mixer', state: { overrides: [{ name: 'In 1 Level (DI)', value: '0.0 dB, Centre' }, { name: 'In 2 Level (Amp)', value: '-6.0 dB, Centre' }] } },
+            { blockId: 'parametric-eq', state: 'on' },
+          ],
+        },
+        {
+          name: 'Scene 2: Driven Amp',
+          summary: 'Drive Ch A on. Amp lane raised in the mix.',
+          blockStates: [
+            { blockId: 'compressor', state: { bypass: 'on', overrides: [{ name: 'Release', value: '90 ms' }] } },
+            { blockId: 'drive', state: { channel: 'A' } },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'mixer', state: 'on' },
+            { blockId: 'parametric-eq', state: 'on' },
+          ],
+        },
+        {
+          name: 'Scene 3: Pick Attack',
+          summary: 'Drive Ch B (brighter). PEQ upper-mid bump for pick definition.',
+          blockStates: [
+            { blockId: 'compressor', state: 'on' },
+            { blockId: 'drive', state: { channel: 'B', overrides: [{ name: 'Tone', value: '6.5' }] } },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'mixer', state: 'on' },
+            { blockId: 'parametric-eq', state: { bypass: 'on', overrides: [{ name: 'Band 3', value: '2.5 kHz, +2.5 dB, Q 1.0' }] } },
+          ],
+        },
+      ],
+      checks: [
+        'DI lane stays full-range; do NOT add a low cut to it.',
+        'Compressor sits BEFORE the split so both lanes feel the same envelope.',
+        'Post-blend PEQ is the safest place to make tonal moves — affects the full sum.',
+      ],
+    },
   },
   {
     id: 'synth-bass-hybrid',
@@ -1550,6 +3376,122 @@ const presetFamilies: PresetFamily[] = [
       { name: 'Scene 2: Square Hook', note: 'Synth mix raised with square wave edge for featured riffs.' },
       { name: 'Scene 3: Dry Reset', note: 'Synth reduced or bypassed, amp lane centered for normal bass support.' },
     ],
+    buildSheet: {
+      globals: [
+        { label: 'Tempo', value: '100 BPM' },
+        { label: 'Input 1', value: 'Bass / Inst, gate -55 dB', note: 'Stable envelope = stable tracking.' },
+        { label: 'Output 1', value: 'Stereo line-level' },
+      ],
+      blocks: [
+        {
+          blockId: 'compressor',
+          type: 'Studio FET (detector stabilizer)',
+          params: [
+            { name: 'Ratio', value: '4.0 : 1' },
+            { name: 'Threshold', value: '-14 dB' },
+            { name: 'Attack', value: '6 ms' },
+            { name: 'Release', value: '80 ms' },
+            { name: 'Level', value: '+1 dB' },
+          ],
+        },
+        {
+          blockId: 'synth',
+          type: 'Monophonic Synth (Voice 1)',
+          channels: [
+            { channel: 'A', role: 'Sub layer — square −12.' },
+            { channel: 'B', role: 'Square hook — full level.' },
+          ],
+          params: [
+            { name: 'Voice 1 Wave', value: 'Square' },
+            { name: 'Voice 1 Pitch', value: '-12 semitones (Ch A) / 0 (Ch B)' },
+            { name: 'Voice 1 Level', value: '7.0' },
+            { name: 'Glide', value: '20 ms' },
+            { name: 'Filter Tracking', value: 'ON' },
+          ],
+          note: 'Use Polyphonic detection if you need chords; mono tracks tighter.',
+        },
+        {
+          blockId: 'filter',
+          type: 'Lowpass (synth row shaping)',
+          params: [
+            { name: 'Mode', value: 'Lowpass 4-pole' },
+            { name: 'Frequency', value: '1.4 kHz' },
+            { name: 'Resonance', value: '15%' },
+          ],
+        },
+        {
+          blockId: 'amp',
+          type: 'Bassguy / Inst-clean (instrument row)',
+          channels: [{ channel: 'A', role: 'Normal instrument tone.' }],
+          params: [
+            { name: 'Drive', value: '3.5' },
+            { name: 'Master', value: '7.0' },
+            { name: 'Bass', value: '5.0' },
+            { name: 'Mid', value: '6.0' },
+            { name: 'Treble', value: '5.5' },
+          ],
+        },
+        {
+          blockId: 'cab',
+          type: 'DynaCab 8x10 SV Bass',
+          params: [
+            { name: 'IR 1', value: 'MD-421 on axis' },
+            { name: 'Low Cut', value: '50 Hz' },
+            { name: 'High Cut', value: '7.5 kHz' },
+          ],
+        },
+        {
+          blockId: 'mixer',
+          type: 'Mixer (Synth + Instrument)',
+          params: [
+            { name: 'In 1 (Synth row)', value: '-6.0 dB, Centre' },
+            { name: 'In 2 (Instrument)', value: '0.0 dB, Centre' },
+          ],
+        },
+      ],
+      scenes: [
+        {
+          name: 'Scene 1: Sub Layer',
+          summary: 'Synth Ch A (−12). Filter rounded. Instrument lane dominates.',
+          blockStates: [
+            { blockId: 'compressor', state: 'on' },
+            { blockId: 'synth', state: { channel: 'A' } },
+            { blockId: 'filter', state: 'on' },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'mixer', state: 'on' },
+          ],
+        },
+        {
+          name: 'Scene 2: Square Hook',
+          summary: 'Synth Ch B (unison). Filter opened. Synth lane raised.',
+          blockStates: [
+            { blockId: 'compressor', state: 'on' },
+            { blockId: 'synth', state: { channel: 'B' } },
+            { blockId: 'filter', state: { bypass: 'on', overrides: [{ name: 'Frequency', value: '2.4 kHz' }] } },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'mixer', state: { overrides: [{ name: 'In 1 (Synth row)', value: '-2.0 dB, Centre' }] } },
+          ],
+        },
+        {
+          name: 'Scene 3: Dry Reset',
+          summary: 'Synth bypassed. Just the dry instrument lane.',
+          blockStates: [
+            { blockId: 'compressor', state: 'on' },
+            { blockId: 'synth', state: 'off' },
+            { blockId: 'filter', state: 'off' },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'mixer', state: 'on' },
+          ],
+        },
+      ],
+      checks: [
+        'Tracking quality = compression at the detector. Lower threshold further if notes drop out.',
+        'Glide 20 ms gives natural legato; raise to 80 ms for synth-bass slides.',
+      ],
+    },
   },
   {
     id: 'acoustic-direct-stage',
@@ -1567,6 +3509,107 @@ const presetFamilies: PresetFamily[] = [
       { name: 'Scene 2: Fingerstyle', note: 'Compression softer, high shelf slightly lower, reverb mix raised.' },
       { name: 'Scene 3: Band Mix', note: 'Enhancer reduced, mids lifted so the part survives in a dense arrangement.' },
     ],
+    buildSheet: {
+      globals: [
+        { label: 'Tempo', value: '92 BPM' },
+        { label: 'Input 1 Gate', value: '-72 dB' },
+        { label: 'Output 1', value: 'Stereo line-level', note: 'No amp/cab — straight to FOH.' },
+      ],
+      blocks: [
+        {
+          blockId: 'compressor',
+          type: 'Pedal 2 (low-ratio opto)',
+          params: [
+            { name: 'Ratio', value: '2.5 : 1' },
+            { name: 'Threshold', value: '-18 dB' },
+            { name: 'Attack', value: '12 ms' },
+            { name: 'Release', value: '110 ms' },
+            { name: 'Level', value: '+1.5 dB' },
+          ],
+        },
+        {
+          blockId: 'filter',
+          type: 'Highpass + Highshelf (acoustic voicing)',
+          params: [
+            { name: 'Mode', value: 'High Shelf' },
+            { name: 'Frequency', value: '5.5 kHz' },
+            { name: 'Gain', value: '+3 dB', note: 'Restores acoustic sparkle missing from magnetic pickup.' },
+            { name: 'Q', value: '0.7' },
+          ],
+        },
+        {
+          blockId: 'parametric-eq',
+          type: '5-band PEQ (acoustic voicing)',
+          params: [
+            { name: 'Band 1', value: '120 Hz, -2 dB, Q 1.0', note: 'Trim low-end boom.' },
+            { name: 'Band 2', value: '350 Hz, -4 dB, Q 1.4', note: 'Cuts magnetic-pickup boxiness.' },
+            { name: 'Band 3', value: '5.0 kHz, +3 dB, Q 0.8', note: 'String sparkle.' },
+            { name: 'Band 4', value: '10 kHz, +2 dB shelf', note: 'Air.' },
+            { name: 'Output Level', value: '0.0 dB' },
+          ],
+        },
+        {
+          blockId: 'enhancer',
+          type: 'Stereo Enhancer',
+          params: [
+            { name: 'Width', value: '+25%' },
+            { name: 'High Cut', value: '9 kHz' },
+            { name: 'Mode', value: 'Stereo' },
+          ],
+        },
+        {
+          blockId: 'reverb',
+          type: 'Small Room',
+          params: [
+            { name: 'Time', value: '1.5 s' },
+            { name: 'Predelay', value: '20 ms' },
+            { name: 'Mix', value: '24%' },
+            { name: 'Mod Depth', value: '0%', note: 'No modulation — acoustic should sound natural.' },
+            { name: 'Low Cut', value: '200 Hz' },
+            { name: 'High Cut', value: '8.0 kHz' },
+          ],
+        },
+      ],
+      scenes: [
+        {
+          name: 'Scene 1: Strum',
+          summary: 'Full sparkle EQ, room natural.',
+          blockStates: [
+            { blockId: 'compressor', state: 'on' },
+            { blockId: 'filter', state: 'on' },
+            { blockId: 'parametric-eq', state: 'on' },
+            { blockId: 'enhancer', state: 'on' },
+            { blockId: 'reverb', state: 'on' },
+          ],
+        },
+        {
+          name: 'Scene 2: Fingerstyle',
+          summary: 'Comp softer, top shelf slightly lower, reverb mix raised.',
+          blockStates: [
+            { blockId: 'compressor', state: { bypass: 'on', overrides: [{ name: 'Ratio', value: '2.0 : 1' }] } },
+            { blockId: 'filter', state: { bypass: 'on', overrides: [{ name: 'Gain', value: '+2 dB' }] } },
+            { blockId: 'parametric-eq', state: 'on' },
+            { blockId: 'enhancer', state: 'on' },
+            { blockId: 'reverb', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '32%' }] } },
+          ],
+        },
+        {
+          name: 'Scene 3: Band Mix',
+          summary: 'Enhancer reduced, mids lifted to cut through a dense band.',
+          blockStates: [
+            { blockId: 'compressor', state: 'on' },
+            { blockId: 'filter', state: 'on' },
+            { blockId: 'parametric-eq', state: { bypass: 'on', overrides: [{ name: 'Band 2', value: '350 Hz, -2 dB, Q 1.4' }, { name: 'Band 3', value: '2.5 kHz, +2 dB, Q 1.0' }] } },
+            { blockId: 'enhancer', state: { bypass: 'on', overrides: [{ name: 'Width', value: '+10%' }] } },
+            { blockId: 'reverb', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '18%' }] } },
+          ],
+        },
+      ],
+      checks: [
+        'No Amp or Cab block — set Output 1 to "Cab Sim OFF" if the unit has a global cab-sim toggle.',
+        'PEQ band 2 (350 Hz cut) is the single move that makes electric → acoustic readable.',
+      ],
+    },
   },
   {
     id: 'cover-gig-command',
@@ -1790,6 +3833,141 @@ const presetFamilies: PresetFamily[] = [
       { name: 'Scene 2: Wide Rhythm', note: 'Stereo delay and reverb lifted without stealing the dry center.' },
       { name: 'Scene 3: Lead Spread', note: 'Wet row wider and louder, dry level still dominant for FOH translation.' },
     ],
+    buildSheet: {
+      globals: [
+        { label: 'Tempo', value: '120 BPM' },
+        { label: 'Input 1 Gate', value: '-65 dB' },
+        { label: 'Output 1', value: 'Stereo line-level', note: 'Mono compatible: dry core is centered.' },
+        { label: 'Output 2', value: 'Wet stereo (optional FOH wet pair)' },
+      ],
+      blocks: [
+        {
+          blockId: 'drive',
+          type: 'BB Pre / T808 (dry-core boost)',
+          channels: [
+            { channel: 'A', role: 'Boost for rhythm/lead scenes.' },
+          ],
+          params: [
+            { name: 'Drive', value: '2.0' },
+            { name: 'Tone', value: '5.5' },
+            { name: 'Level', value: '6.5' },
+          ],
+        },
+        {
+          blockId: 'amp',
+          type: 'Brit 800 / FAS Lead (dry core)',
+          channels: [{ channel: 'A', role: 'Dry core — dial as if there are no wet effects.' }],
+          params: [
+            { name: 'Drive', value: '5.5' },
+            { name: 'Master', value: '5.5' },
+            { name: 'Bass', value: '5.0' },
+            { name: 'Mid', value: '6.5' },
+            { name: 'Treble', value: '5.5' },
+            { name: 'Presence', value: '5.5' },
+          ],
+        },
+        {
+          blockId: 'cab',
+          type: 'DynaCab 4x12 Friedman V30',
+          params: [
+            { name: 'IR 1', value: 'SM57 cap-edge, on axis' },
+            { name: 'IR 2', value: 'R-121 ribbon' },
+            { name: 'IR 2 Level', value: '-4 dB' },
+            { name: 'Low Cut', value: '90 Hz' },
+            { name: 'High Cut', value: '7.5 kHz' },
+          ],
+        },
+        {
+          blockId: 'delay',
+          type: 'Stereo Digital (Wet row only)',
+          params: [
+            { name: 'Time L', value: '1/4 dotted' },
+            { name: 'Time R', value: '1/4' },
+            { name: 'Feedback', value: '28%' },
+            { name: 'Mix', value: '50%', note: 'Lane-only; Kill Dry ON.' },
+            { name: 'Kill Dry', value: 'ON' },
+            { name: 'Low Cut', value: '300 Hz' },
+            { name: 'High Cut', value: '5.5 kHz' },
+          ],
+        },
+        {
+          blockId: 'reverb',
+          type: 'London Plate / Hall (Wet row only)',
+          params: [
+            { name: 'Time', value: '3.0 s' },
+            { name: 'Predelay', value: '50 ms' },
+            { name: 'Mix', value: '60%', note: 'Lane-only; Kill Dry ON.' },
+            { name: 'Kill Dry', value: 'ON' },
+            { name: 'Low Cut', value: '300 Hz' },
+            { name: 'High Cut', value: '6.5 kHz' },
+          ],
+        },
+        {
+          blockId: 'enhancer',
+          type: 'Stereo Enhancer (Wet row width)',
+          params: [
+            { name: 'Width', value: '+25%' },
+            { name: 'High Cut', value: '8 kHz' },
+            { name: 'Mode', value: 'Stereo' },
+          ],
+          note: 'Only on wet lane — never on dry core.',
+        },
+        {
+          blockId: 'mixer',
+          type: 'Mixer (Dry + Wet sum)',
+          params: [
+            { name: 'In 1 (Dry core)', value: '0.0 dB, Centre' },
+            { name: 'In 2 (Wet row)', value: '-9.0 dB, Wide' },
+          ],
+        },
+      ],
+      scenes: [
+        {
+          name: 'Scene 1: Dry Core',
+          summary: 'Drive off. Wet row tucked under. FOH-translation focus.',
+          blockStates: [
+            { blockId: 'drive', state: 'off' },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'delay', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '30%' }] } },
+            { blockId: 'reverb', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '40%' }] } },
+            { blockId: 'enhancer', state: { bypass: 'on', overrides: [{ name: 'Width', value: '+10%' }] } },
+            { blockId: 'mixer', state: 'on' },
+          ],
+        },
+        {
+          name: 'Scene 2: Wide Rhythm',
+          summary: 'Drive on. Wet row raised. Dry stays the loudest.',
+          blockStates: [
+            { blockId: 'drive', state: 'on' },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'delay', state: 'on' },
+            { blockId: 'reverb', state: 'on' },
+            { blockId: 'enhancer', state: 'on' },
+            { blockId: 'mixer', state: { overrides: [{ name: 'In 2 (Wet row)', value: '-6.0 dB, Wide' }] } },
+          ],
+        },
+        {
+          name: 'Scene 3: Lead Spread',
+          summary: 'Wet row louder and wider. Dry core still dominant.',
+          blockStates: [
+            { blockId: 'drive', state: 'on' },
+            { blockId: 'amp', state: { channel: 'A' } },
+            { blockId: 'cab', state: 'on' },
+            { blockId: 'delay', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '60%' }, { name: 'Feedback', value: '38%' }] } },
+            { blockId: 'reverb', state: { bypass: 'on', overrides: [{ name: 'Mix', value: '70%' }] } },
+            { blockId: 'enhancer', state: { bypass: 'on', overrides: [{ name: 'Width', value: '+40%' }] } },
+            { blockId: 'mixer', state: { overrides: [{ name: 'In 2 (Wet row)', value: '-3.0 dB, Wide' }] } },
+          ],
+        },
+      ],
+      checks: [
+        'Kill Dry on Delay and Reverb is mandatory for true wet-dry parallel summing.',
+        'On FM3, the Enhancer adds a noticeable DSP load — skip it and let Reverb stereo width carry.',
+        'Test in mono: the dry core should be coherent on its own; the wet row should be inaudible solo.',
+      ],
+    },
   },
 ]
 

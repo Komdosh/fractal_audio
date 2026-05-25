@@ -1538,9 +1538,7 @@ details.sidebar-cat ul a.active .sidebar-block-abbr {
 
 .page-toc {
   align-items: center;
-  background: rgba(247, 248, 251, 0.94);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: transparent;
   border: 0;
   border-bottom: 1px solid var(--line);
   border-radius: 0;
@@ -1550,9 +1548,6 @@ details.sidebar-cat ul a.active .sidebar-block-abbr {
   gap: 0.2rem 1rem;
   margin-bottom: 0;
   padding: 0.6rem 0;
-  position: sticky;
-  top: 5.3rem;
-  z-index: 9;
 }
 
 .page-toc a {

@@ -1,5 +1,9 @@
 # Fractal Field Guide for FM3 / FM9 / Axe-Fx III
 
+---
+<div align="center"><a href="https://komdosh.github.io/fractal_audio/">Fractal Audio Guide</a></div>
+---
+
 A static reference site focused on the Fractal Audio **FM3, FM9, and Axe-Fx III**. It covers block availability, product-specific instance counts, block parameters, effect and amp type catalogs, signal-chain templates by genre, scene-by-scene preset recipes, hardware differences, and links to primary Fractal Audio resources.
 
 Live deploy target: `https://komdosh.github.io/fractal_audio/`
